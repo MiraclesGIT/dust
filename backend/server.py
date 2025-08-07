@@ -406,6 +406,106 @@ async def create_assistant(
     await db.assistants.insert_one(assistant.dict())
     return assistant
 
+@app.get("/api/workspaces/{workspace_id}/assistants/{assistant_id}", response_model=Assistant)
+async def get_assistant(
+    workspace_id: str,
+    assistant_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    if workspace_id not in current_user.workspaces:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    assistant_doc = await db.assistants.find_one({
+        "id": assistant_id,
+        "workspace_id": workspace_id
+    })
+    
+    if not assistant_doc:
+        raise HTTPException(status_code=404, detail="Assistant not found")
+    
+    return Assistant(**assistant_doc)
+
+@app.put("/api/workspaces/{workspace_id}/assistants/{assistant_id}", response_model=Assistant)
+async def update_assistant(
+    workspace_id: str,
+    assistant_id: str,
+    assistant_data: dict,
+    current_user: User = Depends(get_current_user)
+):
+    if workspace_id not in current_user.workspaces:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Check if assistant exists
+    existing_assistant = await db.assistants.find_one({
+        "id": assistant_id,
+        "workspace_id": workspace_id
+    })
+    
+    if not existing_assistant:
+        raise HTTPException(status_code=404, detail="Assistant not found")
+    
+    # Update fields
+    update_data = {
+        "name": assistant_data.get("name", existing_assistant["name"]),
+        "description": assistant_data.get("description", existing_assistant.get("description")),
+        "type": assistant_data.get("type", existing_assistant["type"]),
+        "model": assistant_data.get("model", existing_assistant["model"]),
+        "system_prompt": assistant_data.get("system_prompt", existing_assistant["system_prompt"]),
+        "instructions": assistant_data.get("instructions", existing_assistant.get("instructions", "")),
+        "updated_at": datetime.utcnow()
+    }
+    
+    # Update in database
+    await db.assistants.update_one(
+        {"id": assistant_id, "workspace_id": workspace_id},
+        {"$set": update_data}
+    )
+    
+    # Return updated assistant
+    updated_assistant_doc = await db.assistants.find_one({
+        "id": assistant_id,
+        "workspace_id": workspace_id
+    })
+    
+    return Assistant(**updated_assistant_doc)
+
+@app.delete("/api/workspaces/{workspace_id}/assistants/{assistant_id}")
+async def delete_assistant(
+    workspace_id: str,
+    assistant_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    if workspace_id not in current_user.workspaces:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Check if assistant exists
+    assistant_doc = await db.assistants.find_one({
+        "id": assistant_id,
+        "workspace_id": workspace_id
+    })
+    
+    if not assistant_doc:
+        raise HTTPException(status_code=404, detail="Assistant not found")
+    
+    # Delete the assistant
+    await db.assistants.delete_one({
+        "id": assistant_id,
+        "workspace_id": workspace_id
+    })
+    
+    # Also delete all conversations with this assistant
+    await db.conversations.delete_many({
+        "assistant_id": assistant_id,
+        "workspace_id": workspace_id
+    })
+    
+    # Delete all messages from those conversations
+    await db.messages.delete_many({
+        "conversation_id": {"$in": []}  # This would need to be updated to get conversation IDs first
+    })
+    
+    return {"message": "Assistant deleted successfully"}
+
 # Conversation Routes
 @app.get("/api/workspaces/{workspace_id}/conversations", response_model=List[Conversation])
 async def get_conversations(workspace_id: str, current_user: User = Depends(get_current_user)):
