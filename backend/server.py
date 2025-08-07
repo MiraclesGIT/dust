@@ -97,6 +97,7 @@ class GoogleIntegrationStatus(str, Enum):
     CONNECTED = "connected"
     DISCONNECTED = "disconnected"
     ERROR = "error"
+    DELETED = "deleted"
 
 # Pydantic Models
 class User(BaseModel):
