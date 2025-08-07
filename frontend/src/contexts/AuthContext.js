@@ -152,6 +152,9 @@ export const AuthProvider = ({ children }) => {
     updateUser,
     updateWorkspace,
     getAuthHeaders,
+    setUser,
+    setWorkspace,
+    setToken,
   };
 
   return (

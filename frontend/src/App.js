@@ -11,6 +11,7 @@ import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import Navbar from './components/common/Navbar';
 import Sidebar from './components/common/Sidebar';
 import LoadingScreen from './components/common/LoadingScreen';
+import GoogleCallback from './components/auth/GoogleCallback';
 
 // Pages
 import LandingPage from './pages/LandingPage';
@@ -21,6 +22,7 @@ import ChatPage from './pages/chat/ChatPage';
 import AssistantsPage from './pages/assistants/AssistantsPage';
 import CreateAssistantPage from './pages/assistants/CreateAssistantPage';
 import EditAssistantPage from './pages/assistants/EditAssistantPage';
+import IntegrationsPage from './pages/integrations/IntegrationsPage';
 import WorkspaceSettingsPage from './pages/workspace/WorkspaceSettingsPage';
 import ProfilePage from './pages/profile/ProfilePage';
 
@@ -95,6 +97,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/google/callback" element={<GoogleCallback />} />
             
             {/* Protected Routes */}
             <Route path="/dashboard" element={
@@ -152,6 +155,16 @@ function App() {
                 <WorkspaceProvider>
                   <AppLayout>
                     <EditAssistantPage />
+                  </AppLayout>
+                </WorkspaceProvider>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/integrations" element={
+              <ProtectedRoute>
+                <WorkspaceProvider>
+                  <AppLayout>
+                    <IntegrationsPage />
                   </AppLayout>
                 </WorkspaceProvider>
               </ProtectedRoute>
