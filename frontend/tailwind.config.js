@@ -41,6 +41,6 @@ module.exports = {
     },
   },
   plugins: [
-    require('@headlessui/react'),
+    require('@tailwindcss/forms'),
   ],
 }
