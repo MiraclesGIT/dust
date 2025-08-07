@@ -206,6 +206,7 @@ export const WorkspaceProvider = ({ children }) => {
     currentAssistant,
     currentConversation,
     loading,
+    setAssistants,
     setCurrentAssistant,
     setCurrentConversation,
     createAssistant,
