@@ -74,12 +74,13 @@ class VERSATILAPITester:
 
     def test_register(self):
         """Test user registration"""
-        test_email = f"test_user_{datetime.now().strftime('%H%M%S')}@example.com"
+        timestamp = datetime.now().strftime('%H%M%S%f')
+        test_email = f"test_user_{timestamp}@example.com"
         test_data = {
             "email": test_email,
             "password": "TestPass123!",
             "name": "Test User",
-            "workspace_name": "Test Workspace"
+            "workspace_name": f"Test Workspace {timestamp}"
         }
         
         success, response = self.run_test(
